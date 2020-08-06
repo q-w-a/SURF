@@ -1,0 +1,1262 @@
+---
+title: "Paramecium and Sporostium analysis"
+author: "Quinn W"
+date: "5/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading needed libraries.
+
+```{r}
+library(tidyverse)
+library(vcfR)
+library(scales)
+library(reshape2)
+
+```
+
+Reading input data.
+
+```{r}
+paramecium_file <- "./Paramecium/paramecium.vcf"
+paramecium_vcfR <- read.vcfR(paramecium_file)
+paramecium_tidy <- vcfR2tidy(paramecium_vcfR, 
+                             single_frame = TRUE, 
+                             info_types = TRUE, 
+                             format_types = TRUE)[["dat"]]
+
+
+spirostomum_file_668_to_668 <- "./Spirostomum/mappedto668/LKH668_FPE_q24_minlen125.fastq.gz_LKH668_Filtered.UC.Final.NTD.ORF.fasta_deduped_filtered.vcf.recode.vcf"
+spirostomum_vcfR_668_to_668 <- read.vcfR(spirostomum_file_668_to_668)
+spirostomum_668_to_668 <- vcfR2tidy(spirostomum_vcfR_668_to_668, 
+                             single_frame = TRUE, 
+                             info_types = TRUE, 
+                             format_types = TRUE)[["dat"]]
+
+
+LKH182_to_182_file <- "./Data/LKH_182/LKH182_FPE_q24_minlen125.fastq.gz_LKH182_XX_LKH182_Filtered.UC.Final.NTD.ORF.fasta_deduped_filtered.vcf.recode.vcf"
+LKH182_to_182_vcfR <- read.vcfR(LKH182_to_182_file)
+LKH182_to_182 <- vcfR2tidy(LKH182_to_182_vcfR, 
+                             single_frame = TRUE, 
+                             info_types = TRUE, 
+                             format_types = TRUE)[["dat"]]
+
+
+spirostomum_file_543_to_543 <- "./Spirostomum/mappedto543/LKH543_FPE_q24_minlen125.fastq.gz_LKH543_Filtered.UC.Final.NTD.ORF.fasta_deduped_filtered.vcf.recode.vcf"
+spirostomum_vcfR_543_to_543 <- read.vcfR(spirostomum_file_543_to_543)
+spirostomum_543_to_543 <- vcfR2tidy(spirostomum_vcfR_543_to_543, 
+                             single_frame = TRUE, 
+                             info_types = TRUE, 
+                             format_types = TRUE)[["dat"]]
+
+spirostomum_file_535_to_535 <- "./Spirostomum/mappedto535/LKH535_FPE_q24_minlen125.fastq.gz_LKH535_Filtered.UC.Final.NTD.ORF.fasta_deduped_filtered.vcf.recode.vcf"
+spirostomum_vcfR_535_to_535 <- read.vcfR(spirostomum_file_535_to_535)
+spirostomum_535_to_535 <- vcfR2tidy(spirostomum_vcfR_535_to_535, 
+                             single_frame = TRUE, 
+                             info_types = TRUE, 
+                             format_types = TRUE)[["dat"]]
+
+LKH182_contig312_file <- "./Data/LKH_182_c312/LKH182_FPE_q24_minlen125.fastq.gz_LKH182_XX_LKH182_contig312.vcf"
+LKH182_contig312_vcfR <- read.vcfR(LKH182_contig312_file)
+LKH182_contig312 <- vcfR2tidy(LKH182_contig312_vcfR, 
+                             single_frame = TRUE, 
+                             info_types = TRUE, 
+                             format_types = TRUE)[["dat"]]
+
+
+LKH_188_all_file76 <- "./Data/LKH_188/LKH188_5_8/all_filtered_188_minid76.vcf"
+LKH_188_all_vcfR76 <- read.vcfR(LKH_188_all_file76)
+LKH_188_all_tidy76 <- vcfR2tidy(LKH_188_all_vcfR76, 
+                              info_only = FALSE,
+                              single_frame = TRUE,
+                             info_types = TRUE, 
+                             format_types = TRUE)[["dat"]]
+
+LKH_188_all_file98 <- "./Data/LKH_188/LKH188_5_8/all_filtered_188_minid98.vcf"
+LKH_188_all_vcfR98 <- read.vcfR(LKH_188_all_file98)
+LKH_188_all_tidy98 <- vcfR2tidy(LKH_188_all_vcfR98)
+
+LKH_188_all_file76_10 <- "./Data/LKH_188/LKH188_5_8/all_filtered_188_minid76_DP10.vcf"
+LKH_188_all_vcfR76_10 <- read.vcfR(LKH_188_all_file76_10)
+
+LKH_188_all_file98_10 <- "./Data/LKH_188/LKH188_5_8/all_filtered_188_minid98_DP10.vcf"
+LKH_188_all_vcfR98_10 <- read.vcfR(LKH_188_all_file98_10)
+
+
+LKH_535_all_file76 <- "./Spirostomum/mappedto535/all_filtered_535_minid76.vcf"
+LKH_535_all_vcfR76 <- read.vcfR(LKH_535_all_file76)
+
+LKH_535_all_file98 <- "./Spirostomum/mappedto535/all_filtered_535_minid98.vcf"
+LKH_535_all_vcfR98 <- read.vcfR(LKH_535_all_file98)
+
+LKH_535_all_file76_10 <- "./Spirostomum/mappedto535/all_filtered_535_minid76_DP10.vcf"
+LKH_535_all_vcfR76_10 <- read.vcfR(LKH_535_all_file76_10)
+
+LKH_535_all_file98_10 <- "./Spirostomum/mappedto535/all_filtered_535_minid98_DP10.vcf"
+LKH_535_all_vcfR98_10 <- read.vcfR(LKH535_all_file98_10)
+
+LKH_535_all_file98_10_p4 <- "./Spirostomum/mappedto535/all_filtered_535_minid98_DP10_p4.vcf"
+LKH_535_all_vcfR98_10_p4 <- read.vcfR(LKH_535_all_file98_10_p4)
+
+```
+
+
+```{r, Functions for VCF Analysis}
+
+#find number of polymorphisms per contig, then graph the distribution of the number of polymorphisms per contig
+
+graph_poly_per_contig <- function(data, my_title = "Polymorphisms per Contig", fill = "#505D83") {
+  data %>% 
+    group_by(CHROM) %>%
+    summarize(num_poly = n()) %>%
+    ggplot(aes(x = num_poly)) + 
+    geom_histogram(binwidth = 1, fill = fill) +
+    theme_minimal() +
+    labs(title = my_title,
+         x = "Number of Polymorphisms",
+         y = "Number of Contigs") +
+    theme(plot.title = element_text(face = "bold", hjust = .5))
+}
+
+
+#graph read depth distribution
+#takes tidy vcf data and optional arguments for title and x limits
+
+graph_depth <- function(data, 
+                        my_title = "Depth Distribution", 
+                        xlimits = c(0, 10000), 
+                        fill = "#505D83",
+                        ylimits = NULL) {
+  data %>% ggplot(aes(x = DP)) + 
+  scale_y_log10(limits = ylimits) + 
+  geom_histogram(binwidth = 500, fill = fill) + 
+  scale_x_continuous(labels = comma, 
+                     limits = xlimits) +
+  labs(title = my_title, 
+       x = "Read Depth", 
+       y = "Number of Polymorphisms") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = .5, face = "bold")) 
+}
+
+#graph allele balance distribution 
+#takes tidy vcf data and optional argument for title
+
+graph_allele_balance <- function(data, my_title = "Allele Balance Distribution", fill = "#505D83", limits = NULL) {
+  data %>% ggplot(aes(x = as.numeric(AB))) +
+  geom_histogram(binwidth = .05, fill = fill) +
+  scale_x_continuous(breaks = c(0, .25, .5, .75, 1),
+                     labels = c("0", ".25", ".5", ".75", "1"), limits = limits) +
+  labs(title = my_title, 
+       x = "Allele Balance", 
+       y = "Number of Polymorphisms") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = .5, face = "bold")) 
+}
+
+graph_length_distribution <- function(data, my_title = "Length Distribution", fill = "#505D83"){
+  data  %>% 
+  filter(str_detect(ALT, ",") == FALSE) %>%
+  mutate(length_alt = nchar(ALT)) %>%
+  ggplot() +
+  geom_histogram(aes(x = length_alt), binwidth = 2, fill = fill) + 
+  scale_y_log10() + 
+  theme_minimal() +
+  labs(title = my_title,
+       subtitle = "Looking at Single-Allelic Sites",
+       x = "Length of Alternate Allele",
+       y = "Number of Polymorphisms") +
+  theme(plot.title = element_text(hjust = .5, face = "bold"),
+        plot.subtitle = element_text(hjust = .5)) 
+}
+
+```
+
+Looking at Spirostomum 535, 543, and 668 (each with their own reads mapped to their own reference).
+
+```{r}
+library(purrr)
+
+
+
+graph_depth(spirostomum_535_to_535, "SPIROSTOMUM:\nRead Depth Distribution for LKH535 Reads\n Mapped to LKH535 Reference") 
+
+graph_depth(spirostomum_543_to_543, "SPIROSTOMUM:\nRead Depth Distribution for LKH543 Reads\n Mapped to LKH543 Reference", ylimits = c(1,1000)) 
+
+graph_depth(spirostomum_668_to_668, "SPIROSTOMUM:\nRead Depth Distribution for LKH668 Reads\n Mapped to LKH668 Reference")
+
+#POLY PER CONTIG
+
+graph_poly_per_contig(spirostomum_535_to_535, "SPIROSTOMUM:\nPolymorphism per Contig Distribution for LKH535 Reads\n Mapped to LKH535 Reference") + scale_y_log10() + xlim(0,60)
+
+graph_poly_per_contig(spirostomum_543_to_543, "SPIROSTOMUM:\nPolymorphism per Contig Distribution for LKH543 Reads\n Mapped to LKH543 Reference") + scale_y_log10() + xlim(0,60)
+
+graph_poly_per_contig(spirostomum_668_to_668, "SPIROSTOMUM:\nPolymorphism per Contig Distribution for LKH668 Reads\n Mapped to LKH668 Reference") + scale_y_log10() + xlim(0,60)
+
+#ALLELE BALANCE 
+
+graph_allele_balance(spirostomum_535_to_535, "SPIROSTOMUM:\nAllele Balance Distribution for LKH535 Reads\n Mapped to LKH535 Reference") 
+
+graph_allele_balance(spirostomum_543_to_543, "SPIROSTOMUM:\nAllele Balance Distribution for LKH543 Reads\n Mapped to LKH543 Reference") 
+
+graph_allele_balance(spirostomum_668_to_668, "SPIROSTOMUM:\nAllele Balance Distribution for LKH668 Reads\n Mapped to LKH668 Reference")
+
+#ALT ALLELE LENGTH
+
+graph_length_distribution(spirostomum_535_to_535, "SPIROSTOMUM:\nPolymorphism Length Distribution for LKH535 Reads\n Mapped to LKH535 Reference") + xlim(0,130)
+
+graph_length_distribution(spirostomum_543_to_543, "SPIROSTOMUM:\nPolymorphism Length Distribution for LKH543 Reads\n Mapped to LKH543 Reference") + xlim(0,130)
+
+graph_length_distribution(spirostomum_668_to_668, "SPIROSTOMUM:\nPolymorphism Length Distribution for LKH668 Reads\n Mapped to LKH668 Reference") + xlim(0,130)
+
+
+```
+
+Creating plots for paramecium.
+
+
+```{r}
+graph_poly_per_contig(paramecium_tidy, "PARAMECIUM:\nPolymorphisms per Contig", fill = "#961209") + scale_x_continuous(breaks = seq(0, 700, by = 30))
+
+graph_depth(paramecium_tidy, 
+            "PARAMECIUM:\nRead Depth Distribution", 
+            fill = "#961209") + scale_y_log10(labels = comma)
+
+graph_allele_balance(paramecium_tidy, 
+            "PARAMECIUM:\nAllele Balance Distribution", 
+            fill = "#961209",  limits = c(.1,1))
+
+graph_length_distribution(paramecium_tidy, 
+            "PARAMECIUM:\nPolymorphism Length Distribution", 
+            fill = "#961209") + 
+  xlim(0,130) +
+  scale_y_log10(labels = comma)
+
+```
+
+
+Comparing plots for Spirostomum 668 reads mapped to reference 668, and Loxodes 182 reads mapped to reference 182.
+
+```{r}
+graph_poly_per_contig(spirostomum_668_to_668, "SPIROSTOMUM:\nPolymorphisms per Contig for LKH668 Reads\n Mapped to LKH668 Reference", fill = "#426DE6") + ylim(limits = c(0,160)) + xlim(limits = c(0,80))
+
+graph_poly_per_contig(LKH182_to_182, "LOXODES:\n Polymorphisms per Contig for LKH182 Reads\n Mapped to LKH182 Reference", fill = "#568D55") + ylim(limits = c(0, 160)) + xlim(limits = c(0, 80))
+
+
+graph_depth(spirostomum_668_to_668, "SPIROSTOMUM:\nRead Depth Distribution for LKH668 Reads\n Mapped to LKH668 Reference", fill = "#426DE6") + xlim(limits = c(0, 6000))
+
+graph_depth(LKH182_to_182, "LOXODES:\n Read Depth Distribution for LKH182 Reads\n Mapped to LKH182 Reference", fill = "#568D55") + scale_x_continuous(limits = c(0, 7800), breaks = c(0, 2500, 5000, 7500))
+
+graph_length_distribution(spirostomum_668_to_668, "SPIROSTOMUM:\nPolymorphism Length Distribution for LKH668 Reads\n Mapped to LKH668 Reference", fill = "#426DE6") + 
+  xlim(0, 90)
+
+graph_length_distribution(LKH182_to_182, "LOXODES:\n Polymorphism Length Distribution for LKH182 Reads\n Mapped to LKH182 Reference", fill = "#568D55") + xlim(0,130) 
+
+graph_allele_balance(spirostomum_668_to_668, "SPIROSTOMUM:\nAllele Balance Distribution for LKH668 Reads\n Mapped to LKH668 Reference", fill = "#426DE6") 
+
+graph_allele_balance(LKH182_to_182, "LOXODES:\n Allele Balance Distribution for LKH182 Reads\n Mapped to LKH182 Reference", fill = "#568D55")
+
+
+
+```
+
+
+##Heterozygosity Analysis.
+Here, we're beginning with Loxodes. Reads from cells LKH182, LKH188, and LKH375 are all mapped to the LKH188 reference.
+
+```{r}
+#LKH_188_all_tidy %>%
+#  mutate(LKH = substr(CHROM, 1, 16)) %>%
+#  group_by(LKH) %>% 
+#  summarize(n = n()) %>% 
+#  select(LKH)
+
+#supply population information as a factor
+pop_lox <- as.factor(c("LKH375", "LKH182", "LKH188"))
+
+lox_Diff76 <- genetic_diff(LKH_188_all_vcfR76, pops = pop_lox, method = 'nei')
+
+lox_Diff98 <- genetic_diff(LKH_188_all_vcfR98, pops = pop_lox, method = 'nei')
+
+
+
+```
+
+
+Here, we compare how the distribution of allele count varies for the different sets of reads. Heterozygosities are weighted by the number of alleles observed in each population. 
+
+```{r}
+
+#plotting number of alleles for the different sets of reads
+
+
+#MINID76
+ggplot(lox_Diff76, aes(x = n_LKH182)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0,5000) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH182 Reads (MINID76)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff76, aes(x = n_LKH188)) +
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 5000) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH188 Reads (MINID76)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff76, aes(x = n_LKH375)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 5000) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH375 Reads (MINID76)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+# MINID98
+ggplot(lox_Diff98, aes(x = n_LKH182)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0,1500) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH182 Reads (MINID98)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff98, aes(x = n_LKH188)) +
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 1500) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH188 Reads (MINID98)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff98, aes(x = n_LKH375)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 1500) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH375 Reads (MINID98)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#GST DISTRIBUTION
+
+#MINID76
+ggplot(lox_Diff76, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of Gst (MINID76)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff76, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of G'st (MINID76)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#MINID98
+ggplot(lox_Diff98, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of Gst (MINID98)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff98, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of G'st (MINID98)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#Summarizing means for each column
+
+#MINID76
+names = colnames(lox_Diff76[,c(3:13)])
+lox_summary76 <- round(colMeans(lox_Diff76[,c(3:13)], na.rm = TRUE), digits = 3)
+lox_summary76 <- tibble("names" = names, values = lox_summary76)
+
+lox_summary76 %>% 
+  filter(names %in% c("Hs_LKH182", "Hs_LKH188", "Hs_LKH375")) %>% 
+  ggplot() + 
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#568D55") +
+  labs(title = "LOXODES:\nMean Heterozygosities\n (MINID76)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH182", "LKH188", "LKH375")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#MINID98
+names = colnames(lox_Diff98[,c(3:13)])
+lox_summary98 <- round(colMeans(lox_Diff98[,c(3:13)], na.rm = TRUE), digits = 3)
+lox_summary98 <- tibble("names" = names, values = lox_summary98)
+
+lox_summary98 %>% 
+  filter(names %in% c("Hs_LKH182", "Hs_LKH188", "Hs_LKH375")) %>% 
+  ggplot() + 
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#568D55") +
+  labs(title = "LOXODES:\nMean Heterozygosities\n (MINID98)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH182", "LKH188", "LKH375")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+        
+```
+
+Making violin plots for Loxodes.
+
+```{r}
+#MINID76
+
+#heterozygosities for different cells
+
+lox_het_mdf76 <- melt(lox_Diff76[,c(3:6, 13)], varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+lox_mdf76 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal()
+
+
+#Gprime and Gst distribution - violin plots
+
+#MINID76
+lox_g_mdf76 <- melt(lox_Diff76[,c(10, 13)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+lox_g_mdf76 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal() + 
+  labs(title = "LOXODES:\nGst and G'st (MINID76)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#MINID98
+lox_het_mdf98 <- melt(lox_Diff98[,c(3:6, 13)], varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+lox_mdf98 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal()
+
+
+#Gprime and Gst distribution
+
+lox_g_mdf98 <- melt(lox_Diff98[,c(10, 13)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+lox_g_mdf98 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal() + 
+  labs(title = "LOXODES:\nGst and G'st (MINID98)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+```
+
+Filtering for allele balance.
+
+```{r}
+
+LKH_188_all_76_10_tidy <- vcfR2tidy(LKH_188_all_vcfR76_10, single_frame = TRUE, info_types = TRUE, format_types = TRUE)[["dat"]]
+
+LKH_188_all_98_10_tidy <-  vcfR2tidy(LKH_188_all_vcfR98_10, single_frame = TRUE, info_types = TRUE, format_types = TRUE)[["dat"]]
+
+filter_AB_lox76 <- LKH_188_all_76_10_tidy %>% 
+  filter(AB > .2 | AB == 0) %>% 
+  select(CHROM, POS, AB) %>% 
+  mutate(ID = paste(CHROM, POS, sep="_")) %>% 
+  pull(ID)
+
+filter_AB_lox98 <- LKH_188_all_98_10_tidy %>% 
+  filter(AB > .2 | AB == 0) %>% 
+  select(CHROM, POS, AB) %>% 
+  mutate(ID = paste(CHROM, POS, sep="_")) %>% 
+  pull(ID)
+
+```
+
+
+Loxodes DP 10 heterozygosity analysis.
+
+```{r}
+pop_lox <- as.factor(c("LKH375", "LKH182", "LKH188"))
+
+lox_Diff76_10 <- genetic_diff(LKH_188_all_vcfR76_10, pops = pop_lox, method = 'nei')
+
+lox_Diff98_10 <- genetic_diff(LKH_188_all_vcfR98_10, pops = pop_lox, method = 'nei')
+
+#adding the filter for AB
+
+lox_Diff76_10 <- genetic_diff(LKH_188_all_vcfR76_10, pops = pop_lox, method = 'nei') %>% 
+  mutate(ID = paste(CHROM, POS, sep = "_")) %>% 
+  filter(ID %in% filter_AB_lox76)
+
+lox_Diff98_10 <- genetic_diff(LKH_188_all_vcfR98_10, pops = pop_lox, method = 'nei') %>% 
+  mutate(ID = paste(CHROM, POS, sep = "_")) %>% 
+  filter(ID %in% filter_AB_lox98)
+
+#plotting number of alleles for the different sets of reads
+
+
+#MINID76
+ggplot(lox_Diff76_10, aes(x = n_LKH182)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0,5000) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH182 Reads (MINID76, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff76_10, aes(x = n_LKH188)) +
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 5000) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH188 Reads (MINID76, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff76_10, aes(x = n_LKH375)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 5000) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH375 Reads (MINID76, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+# MINID98
+ggplot(lox_Diff98_10, aes(x = n_LKH182)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0,1500) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH182 Reads (MINID98, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff98_10, aes(x = n_LKH188)) +
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 1500) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH188 Reads (MINID98, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(lox_Diff98_10, aes(x = n_LKH375)) + 
+  geom_histogram(binwidth = 1, fill = "#568D55") + 
+  ylim(0, 1500) + 
+  labs(title = "LOXODES:\nDistribution of Number of Alleles for LKH375 Reads (MINID98, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#GST DISTRIBUTION
+
+#MINID76
+ggplot(lox_Diff76_10, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of Gst (MINID76, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + scale_x_continuous(limits = c(-.1, 1.0))
+
+ggplot(lox_Diff76_10, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of G'st (MINID76, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + scale_x_continuous(limits = c(-.1, 1.0))
+
+#MINID98
+ggplot(lox_Diff98_10, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of Gst (MINID98, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + scale_x_continuous(limits = c(-.1, 1.0))
+
+ggplot(lox_Diff98_10, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#568D55") + 
+  labs(title = "LOXODES:\nDistribution of G'st (MINID98, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + scale_x_continuous(limits = c(-.1, 1.0))
+
+
+#Summarizing means for each column
+
+#MINID76
+names = colnames(lox_Diff76_10[,c(3:13)])
+lox_summary76_10 <- round(colMeans(lox_Diff76_10[,c(3:13)], na.rm = TRUE), digits = 3)
+lox_summary76_10 <- tibble("names" = names, values = lox_summary76_10)
+
+lox_summary76_10 %>% 
+  filter(names %in% c("Hs_LKH182", "Hs_LKH188", "Hs_LKH375")) %>%
+  ggplot() + 
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#568D55")  + 
+  geom_label(aes(label = values, 
+                 x = names, 
+                 y = values)) +
+  labs(title = "LOXODES:\nMean Heterozygosities\n (MINID76, DP10)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH182", "LKH188", "LKH375")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + ylim(0, .5)
+
+#MINID98
+names = colnames(lox_Diff98_10[,c(3:13)])
+lox_summary98_10 <- round(colMeans(lox_Diff98_10[,c(3:13)], na.rm = TRUE), digits = 3)
+lox_summary98_10 <- tibble("names" = names, values = lox_summary98_10) 
+
+lox_summary98_10 %>% 
+  filter(names %in% c("Hs_LKH182", "Hs_LKH188", "Hs_LKH375")) %>% 
+  ggplot() + 
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#568D55")  + 
+  geom_label(aes(label = values, 
+                 x = names, 
+                 y = values)) +
+  labs(title = "LOXODES:\nMean Heterozygosities\n (MINID98, DP10)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH182", "LKH188", "LKH375")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + ylim(0, .5)
+
+
+
+#GST and G'ST DISTRIBUTION - violin plots
+
+#MINID76
+lox_g_mdf76_10 <- melt(lox_Diff76_10[,c(10, 13)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+lox_g_mdf76_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal() + 
+  labs(title = "LOXODES:\nGst and G'st (MINID76, DP10)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#heterozygosity
+
+lox_mdf76_het_10 <- melt(lox_Diff76_10[,c(3, 4,5)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+lox_mdf76_het_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal() + 
+  labs(title = "LOXODES:\nHeterozygosities (MINID76, DP10)",x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+het_lox76_10 <- length(which(lox_mdf76_het_10$Depth==.5))
+not_het_lox76_10 <- length(which(lox_mdf76_het_10$Depth==0))
+length(lox_mdf76_het_10$Depth)
+
+#MINID98
+
+lox_g_mdf98_10 <- melt(lox_Diff98_10[,c(10, 13)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+lox_g_mdf98_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal() + 
+  labs(title = "LOXODES:\nGst and G'st (MINID98, DP10)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + ylim(0, 1)
+
+#heterozygosity
+lox_mdf98_het_10 <- melt(lox_Diff98_10[,c(3, 4,5)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+het_lox98_10 <- length(which(lox_mdf98_het_10$Depth==.5))
+not_het_lox98_10 <- length(which(lox_mdf98_het_10$Depth==0))
+length(lox_mdf98_het_10$Depth)
+
+lox_mdf98_het_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#568D55") + 
+  theme_minimal() + 
+  labs(title = "LOXODES:\nHeterozygosities (MINID98, DP10)",x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+```
+
+Spirostomum heterozygosity analysis.
+
+
+```{r}
+pop_spir <- as.factor(c("LKH668", "LKH535"))
+
+spir_Diff76 <- genetic_diff(LKH_535_all_vcfR76, pops = pop_spir, method = 'nei')
+
+spir_Diff98 <- genetic_diff(LKH_535_all_vcfR98, pops = pop_spir, method = 'nei')
+
+
+
+```
+
+```{r}
+#ALLELE COUNT DISTRIBUTION
+
+#MINID76
+ggplot(spir_Diff76, aes(x = n_LKH668)) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH668 Reads (MINID76)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  ylim(0,9000) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(spir_Diff76, aes(x = n_LKH535)) +
+  ylim(0, 9000) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH535 Reads (MINID76)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#MINID98
+ggplot(spir_Diff98, aes(x = n_LKH668)) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH668 Reads (MINID98)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  ylim(0,4500) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(spir_Diff98, aes(x = n_LKH535)) +
+  ylim(0, 4500) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH535 Reads (MINID98)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#GST DISTRIBUTION
+
+#MINID76
+ggplot(spir_Diff76, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Gst (MINID76)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(spir_Diff76, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of G'st (MINID76)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#MINID98
+ggplot(spir_Diff98, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Gst (MINID98)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(spir_Diff98, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of G'st (MINID98)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+```
+
+```{r}
+#Mean Heterozygosity plots for Spirostomum
+
+#MINID76
+names_spir = colnames(spir_Diff76[,c(3:11)])
+spir_summary76 <- round(colMeans(spir_Diff76[,c(3:11)], na.rm = TRUE), digits = 3)
+spir_summary76 <- tibble("names" = names_spir, values = spir_summary76)
+
+spir_summary76 %>% 
+  filter(names %in% c("Hs_LKH535", "Hs_LKH668")) %>% 
+  ggplot() + 
+  ylim(0, .3) +
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#426DE6") +
+  labs(title = "SPIROSTOMUM:\nMean Heterozygosities\n (MINID76)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH535", "LKH668")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#MINID98
+spir_summary98 <- round(colMeans(spir_Diff98[,c(3:11)], na.rm = TRUE), digits = 3)
+
+spir_summary98 %>% tibble()
+
+spir_summary98_rownames <- names(spir_summary98)
+
+spir_summary98 <- tibble("names" = names_spir, values = spir_summary98)
+
+spir_summary98 %>% 
+  filter(names %in% c("Hs_LKH535", "Hs_LKH668")) %>% 
+  ggplot() + 
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#426DE6") +
+  ylim(0, .3) +
+  labs(title = "SPIROSTOMUM:\nMean Heterozygosities\n (MINID98)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH535", "LKH668")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+```
+
+```{r}
+
+#Violin plots for Spirostomum
+
+#MINID76
+spir_mdf76 <- melt(spir_Diff76[,c(8, 11)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf76 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nGst and G'st (MINID76)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#MINID98
+spir_mdf98 <- melt(spir_Diff98[,c(8, 11)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf98 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nGst and G'st (MINID98)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+```
+
+```{r}
+top_chrom <- spir_Diff76 %>% 
+  filter(Gprimest != "NaN") %>% 
+  group_by(CHROM) %>% summarize(n = n()) %>% arrange(desc(n)) %>% head(5)
+
+lox_Diff76 %>% filter(str_detect(CHROM, "_126605")) %>% mutate(name = substr(CHROM, 14, 1000)) %>% 
+  ggplot(aes(x = as.numeric(POS), y = Gprimest)) + 
+  geom_point(shape = 16, alpha = .5, fill = "#426DE6") + facet_wrap(~name, scales = "free_x") + theme_minimal() +
+  theme(strip.background = element_rect(fill = "#f2f4f5", color = NA))
+
+ggplot(spir_Diff76, aes(x = as.numeric(POS), y = Gprimest)) + geom_point(alpha = .2, fill = "#426DE6") +
+  scale_x_continuous(breaks = seq(0, 1000, by = 100), labels = seq(0, 1000, by = 100))
+                                                              
+                                                    
+```
+
+DEPTH 10 ANALYSIS
+
+Filtering for allele balance. 
+
+```{r}
+LKH_535_all_76_10_tidy <- vcfR2tidy(LKH_535_all_vcfR76_10, single_frame = TRUE, info_types = TRUE, format_types = TRUE)[["dat"]]
+
+LKH_535_all_98_10_tidy <-  vcfR2tidy(LKH_535_all_vcfR98_10, single_frame = TRUE, info_types = TRUE, format_types = TRUE)[["dat"]]
+
+filter_AB_spir76 <- LKH_535_all_76_10_tidy %>% 
+  filter(AB > .2 | AB == 0) %>% 
+  select(CHROM, POS, AB) %>% 
+  mutate(ID = paste(CHROM, POS, sep="_")) %>% 
+  pull(ID)
+
+filter_AB_spir98 <- LKH_535_all_98_10_tidy %>% 
+  filter(AB > .2 | AB == 0) %>% 
+  select(CHROM, POS, AB) %>% 
+  mutate(ID = paste(CHROM, POS, sep="_")) %>% 
+  pull(ID)
+
+```
+
+
+
+
+Spirostomum
+
+```{r}
+pop_spir <- as.factor(c("LKH668", "LKH535"))
+
+spir_Diff76_10 <- genetic_diff(LKH_535_all_vcfR76_10, pops = pop_spir, method = 'nei')
+
+spir_Diff98_10 <- genetic_diff(LKH_535_all_vcfR98_10, pops = pop_spir, method = 'nei')
+
+#adding the filter for AB
+
+spir_Diff76_10 <- genetic_diff(LKH_535_all_vcfR76_10, pops = pop_spir, method = 'nei') %>% 
+  mutate(ID = paste(CHROM, POS, sep = "_")) %>% 
+  filter(ID %in% filter_AB_spir76)
+
+spir_Diff98_10 <- genetic_diff(LKH_535_all_vcfR98_10, pops = pop_spir, method = 'nei') %>% 
+  mutate(ID = paste(CHROM, POS, sep = "_")) %>% 
+  filter(ID %in% filter_AB_spir98)
+
+#ALLELE COUNT DISTRIBUTION
+
+#MINID76
+ggplot(spir_Diff76_10, aes(x = n_LKH668)) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH668 Reads (MINID76, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  ylim(0,7500) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(spir_Diff76_10, aes(x = n_LKH535)) +
+  ylim(0, 7500) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH535 Reads (MINID76, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#MINID98
+ggplot(spir_Diff98_10, aes(x = n_LKH668)) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH668 Reads (MINID98, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  ylim(0,3000) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(spir_Diff98_10, aes(x = n_LKH535)) +
+  ylim(0, 3000) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH535 Reads (MINID98, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#GST DISTRIBUTION
+
+#MINID76
+ggplot(spir_Diff76_10, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Gst (MINID76, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + scale_x_continuous(limits = c(-.1, 1.2), breaks = seq(0, 1.2, by = .2))
+
+ggplot(spir_Diff76_10, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of G'st (MINID76, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) + scale_x_continuous(limits = c(-.1, 1.2), breaks = seq(0, 1.2, by = .2))
+
+
+#MINID98
+ggplot(spir_Diff98_10, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Gst (MINID98, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) +
+  scale_x_continuous(limits = c(-.1, 1.2), breaks = seq(0, 1.2, by = .2))
+
+ggplot(spir_Diff98_10, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of G'st (MINID98, DP10)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))+ scale_x_continuous(limits = c(-.1, 1.2), breaks = seq(0, 1.2, by = .2))
+
+#VIOLIN PLOTS
+
+#MINID76
+spir_mdf76_10 <- melt(spir_Diff76_10[,c(8, 11)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf76_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nGst and G'st (MINID76, DP10)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#for heterozygosity
+
+spir_mdf76_het_10 <- melt(spir_Diff76_10[,c(3, 4)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf76_het_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nHeterozygosities\n (MINID76, DP10)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#MINID98
+spir_mdf98_10 <- melt(spir_Diff98_10[,c(8, 11)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf98_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nGst and G'st (MINID98, DP10)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#for heterozygosity
+spir_mdf98_het_10 <- melt(spir_Diff98_10[,c(3, 4)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf98_het_10 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nHeterozygosities\n (MINID98, DP10)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+het_spir76_10 <- length(which(spir_mdf76_het_10$Depth==.5))
+not_het_spir76_10 <- length(which(spir_mdf76_het_10$Depth==0))
+length(spir_mdf76_het_10$Depth)
+
+het_spir98_10 <- length(which(spir_mdf98_het_10$Depth==.5))
+not_het_spir98_10 <- length(which(spir_mdf98_het_10$Depth==0))
+length(spir_mdf98_het_10$Depth)
+
+#Mean Heterozygosity Plots for Spirostomum
+
+#MINID76
+names_spir_10 = colnames(spir_Diff76_10[,c(3:11)])
+spir_summary76_10 <- round(colMeans(spir_Diff76_10[,c(3:11)], na.rm = TRUE), digits = 3)
+spir_summary76_10 <- tibble("names" = names_spir_10, values = spir_summary76_10)
+
+spir_summary76_10 %>% 
+  filter(names %in% c("Hs_LKH535", "Hs_LKH668")) %>% 
+  ggplot() + 
+  ylim(0, .5) +
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#426DE6")  + 
+  geom_label(aes(label = values, 
+                 x = names, 
+                 y = values)) +
+  labs(title = "SPIROSTOMUM:\nMean Heterozygosities\n (MINID76, DP10)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH535", "LKH668")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) 
+
+#MINID98
+spir_summary98_10 <- round(colMeans(spir_Diff98_10[,c(3:11)], na.rm = TRUE), digits = 3)
+spir_summary98_10 <- tibble("names" = names_spir_10, values = spir_summary98_10)
+
+spir_summary98_10 %>% 
+  filter(names %in% c("Hs_LKH535", "Hs_LKH668")) %>% 
+  ggplot() + 
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#426DE6") + 
+  geom_label(aes(label = values, 
+                 x = names, 
+                 y = values)) +
+  ylim(0, .3) +
+  labs(title = "SPIROSTOMUM:\nMean Heterozygosities\n (MINID98, DP10)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH535", "LKH668")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+
+```
+
+Heterozygosity analysis for spirostomum with ploidy set to 4.
+
+```{r}
+LKH_535_all_98_10_p4_tidy <-  vcfR2tidy(LKH_535_all_vcfR98_10_p4, single_frame = TRUE, info_types = TRUE, format_types = TRUE)[["dat"]]
+
+
+filter_AB_spir98_p4 <- LKH_535_all_98_10_p4_tidy %>% 
+  filter(AB > .2) %>% 
+  select(CHROM, POS, AB) %>% 
+  mutate(ID = paste(CHROM, POS, sep="_")) %>% 
+  pull(ID)
+
+pop_spir <- as.factor(c("LKH668", "LKH535"))
+
+
+spir_Diff98_10_p4 <- genetic_diff(LKH_535_all_vcfR98_10_p4, pops = pop_spir, method = 'nei')
+
+#adding the filter for AB
+
+spir_Diff98_10_p4 <- genetic_diff(LKH_535_all_vcfR98_10, pops = pop_spir, method = 'nei') %>% 
+  mutate(ID = paste(CHROM, POS, sep = "_")) %>% 
+  filter(ID %in% filter_AB_spir98_p4)
+
+#ALLELE COUNT DISTRIBUTION
+
+
+#MINID98
+ggplot(spir_Diff98_10_p4, aes(x = n_LKH668)) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH668 Reads (MINID98, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  ylim(0,3000) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+ggplot(spir_Diff98_10_p4, aes(x = n_LKH535)) +
+  ylim(0, 3000) + 
+  geom_histogram(binwidth = 1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Number of Alleles for LKH535 Reads (MINID98, DP10)",
+       y = "Number of Polymorphisms",
+       x = "Number of Alleles") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+#GST DISTRIBUTION
+
+
+ggplot(spir_Diff98_10_p4, aes(x = Gst)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of Gst (MINID98, DP10, P4)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5)) +
+  scale_x_continuous(limits = c(-.1, 1.2), breaks = seq(0, 1.2, by = .2))
+
+ggplot(spir_Diff98_10_p4, aes(x = Gprimest)) + 
+  geom_histogram(binwidth = .1, fill = "#426DE6") + 
+  labs(title = "SPIROSTOMUM:\nDistribution of G'st (MINID98, DP10, P4)",
+       y = "Number of Observations") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))+ scale_x_continuous(limits = c(-.1, 1.2), breaks = seq(0, 1.2, by = .2))
+
+
+#VIOLIN PLOTS
+
+spir_mdf98_10_p4 <- melt(spir_Diff98_10_p4[,c(8, 11)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf98_10_p4 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nGst and G'st (MINID98, DP10, P4)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+#for heterozygosity
+spir_mdf98_het_10_p4 <- melt(spir_Diff98_10[,c(3, 4)],varnames = c('Index', 'Sample'),
+                value.name = 'Depth', 
+                na.rm = TRUE)
+
+spir_mdf98_het_10_p4 %>% ggplot(aes(x = variable, y = Depth)) +
+  geom_violin(fill = "#426DE6") + 
+  theme_minimal() + 
+  labs(title = "SPIROSTOMUM:\nHeterozygosities\n (MINID98, DP10, P4)",
+                         x = NULL, y = NULL) +
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+
+
+het_spir98_10_p4 <- length(which(spir_mdf98_het_10_p4$Depth==.5))
+not_het_spir98_10_p4 <- length(which(spir_mdf98_het_10_p4$Depth==0))
+length(spir_mdf98_het_10$Depth)
+
+#Mean Heterozygosity Plots for Spirostomum
+
+
+#MINID98
+spir_summary98_10_p4 <- round(colMeans(spir_Diff98_10_p4[,c(3:11)], na.rm = TRUE), digits = 3)
+spir_summary98_10_p4 <- tibble("names" = names_spir_10, values = spir_summary98_10_p4)
+
+spir_summary98_10_p4 %>% 
+  filter(names %in% c("Hs_LKH535", "Hs_LKH668")) %>% 
+  ggplot() + 
+  geom_bar(aes(x = names, y = values), stat = "identity", fill = "#426DE6") +
+  ylim(0, .5) +
+  labs(title = "SPIROSTOMUM:\nMean Heterozygosities\n (MINID98, DP10, P4)",
+       y = "Mean Heterozygosity",
+       x = "Sample") +
+  scale_x_discrete(labels = c("LKH535", "LKH668")) +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", hjust = .5))
+
+```
+
+
+```{r}
+
+LKH_182_to_182_tidy  %>% 
+  filter(str_detect(ALT, ",") == FALSE) %>%
+  mutate(length_alt = nchar(ALT)) %>%
+  ggplot() +
+  geom_histogram(aes(x = length_alt), binwidth = 1) + 
+  scale_y_log10() + 
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = .5, face = "bold")) 
+
+allele_count <- paramecium_tidy %>%
+  mutate(NUM_ALLELES = ifelse(str_count(ALT, ",") == TRUE, 
+                              str_count(ALT, ",") + 1, 1))  %>% select(NUM_ALLELES)
+
+str_locate("TAGTTAT,TAATTCT",	",")[[1]]
+
+substr("TAGTTAT,TA", 0, str_locate("TAGTTAT,TAATTCT",	",")[[1]] - 1)
+substr(ALT, 0, str_locate(ALT,	",")[[1]] - 1)
+
+test<- LKH_182_to_182_tidy  %>% 
+  mutate(length_alt = ifelse(str_detect(ALT, ",") == TRUE,
+                             nchar(substr(ALT, 0, str_locate(ALT,	",")[[1]] - 1)), nchar(ALT)))
+
+```
+
