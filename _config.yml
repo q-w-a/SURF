@@ -1,1 +1,8 @@
+navbar:
+  title: "Analysis of Genetic Diversity in Ciliates"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Heterozygosity Tutorial"
+      href: Heterozygosity_Tutorial.html
 theme: jekyll-theme-minimal
